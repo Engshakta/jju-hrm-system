@@ -53,4 +53,4 @@ Copy
    git add README.md
    git commit -m "Added simplified README"
    git push origin master
-Check: Visit https://github.com/your-username/jju-hrm-system
+Check: Visit https://github.com/Engshakta/jju-hrm-system/new/master
