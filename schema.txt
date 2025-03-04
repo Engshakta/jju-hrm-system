@@ -1,0 +1,106 @@
+-- Database: hrm_jigjiga
+CREATE DATABASE IF NOT EXISTS hrm_jigjiga;
+USE hrm_jigjiga;
+
+-- Employees Table
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id VARCHAR(10) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(20),
+    role VARCHAR(50),
+    department VARCHAR(50),
+    salary DECIMAL(10, 2),
+    joining_date DATE,
+    status ENUM('active', 'inactive') DEFAULT 'active',
+    profile_picture VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_deleted TINYINT(1) DEFAULT 0
+);
+
+-- Attendance Table
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    date DATE NOT NULL,
+    status ENUM('present', 'absent', 'late', 'leave') DEFAULT 'present',
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes VARCHAR(255),
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+-- Leaves Table
+CREATE TABLE leaves (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP NULL,
+    reviewed_by INT,
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES employees(id) ON DELETE SET NULL
+);
+
+-- Jobs Table
+CREATE TABLE jobs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('open', 'closed') DEFAULT 'open',
+    posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    posted_by INT,
+    FOREIGN KEY (posted_by) REFERENCES employees(id) ON DELETE SET NULL
+);
+
+-- Job Applications Table
+CREATE TABLE job_applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id INT NOT NULL,
+    employee_id INT NOT NULL,
+    cover_letter TEXT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP NULL,
+    reviewed_by INT,
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES employees(id) ON DELETE SET NULL
+);
+
+
+USE hrm_jigjiga;
+
+-- Sample Employees
+INSERT INTO employees (employee_id, full_name, email, phone, role, department, salary, joining_date, status) VALUES
+('EMP001', 'John Doe', 'john.doe@jju.edu', '1234567890', 'Admin', 'IT', 75000.00, '2023-01-15', 'active'),
+('EMP002', 'Jane Smith', 'jane.smith@jju.edu', '0987654321', 'Staff', 'HR', 45000.00, '2022-06-01', 'active'),
+('EMP003', 'Employee One', 'employee.one@jju.edu', '1112223333', 'Employee', 'IT', 40000.00, '2023-03-01', 'active');
+
+-- Sample Attendance
+INSERT INTO attendance (employee_id, date, status, notes) VALUES
+(1, '2025-03-01', 'present', 'On time'),
+(2, '2025-03-01', 'late', 'Traffic delay'),
+(3, '2025-03-02', 'absent', 'Sick leave');
+
+-- Sample Leaves
+INSERT INTO leaves (employee_id, start_date, end_date, reason, status) VALUES
+(1, '2025-03-10', '2025-03-12', 'Medical appointment', 'pending'),
+(2, '2025-03-15', '2025-03-17', 'Family emergency', 'approved'),
+(3, '2025-03-20', '2025-03-21', 'Vacation', 'rejected');
+
+-- Sample Jobs
+INSERT INTO jobs (title, department, description, status, posted_by) VALUES
+('Software Engineer', 'IT', 'Develop university systems.', 'open', 1),
+('HR Specialist', 'HR', 'Manage recruitment.', 'closed', 1),
+('Professor', 'Computer Science', 'Teach courses.', 'open', 1);
+
+-- Sample Job Applications
+INSERT INTO job_applications (job_id, employee_id, cover_letter, status) VALUES
+(1, 2, 'Eager to join IT team.', 'pending'),
+(1, 3, 'Experienced developer.', 'accepted');
